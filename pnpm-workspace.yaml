@@ -1,0 +1,6 @@
+packages:
+  - 'apps/*'
+  - 'docs'
+  - 'packages/*'
+allowBuilds:
+  esbuild: false

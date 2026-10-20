@@ -1,0 +1,30 @@
+{
+  "name": "agent-study",
+  "private": true,
+  "description": "前端 AI Agent 零基础入门到实战：apps 实践 + docs 笔记 monorepo",
+  "main": "index.js",
+  "scripts": {
+    "docs:dev": "pnpm --filter docs dev",
+    "docs:build": "pnpm --filter docs build",
+    "docs:preview": "pnpm --filter docs preview",
+    "lesson-01": "pnpm --filter lesson-01 dev"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^11.7.0",
+      "onFail": "download"
+    }
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "typescript": "^7.0.2"
+  }
+}

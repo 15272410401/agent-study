@@ -1,0 +1,106 @@
+name: Deploy Docs to GitHub Pages
+
+# 事件触发
+on:
+  push:
+    # 只在这些分支被 push 时触发
+    branches: [main]
+    # 只在这些路径被修改时触发
+    paths:
+      - 'docs/**'
+      - 'package.json'
+      - 'pnpm-workspace.yaml'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/deploy-docs.yml'
+  # 支持手动触发
+  workflow_dispatch:
+
+# 权限
+permissions:
+  # 允许访问仓库内容
+  contents: read
+  # 允许写入 GitHub Pages 内容
+  pages: write
+  # 允许写入 ID 令牌。
+  # 这是 OIDC（OpenID Connect）权限。
+  # actions/deploy-pages@v4不再用长期 token，而是通过 OIDC 向 GitHub 换取短期、一次性的部署凭据。
+  # 这是现代 CI 的最佳实践——不存储长期密钥，每次运行现换临时凭证，泄露风险降到最低。
+  id-token: write
+
+# 并发
+concurrency:
+  # 表示"同一时间这个组里只能有一个运行中的 workflow"
+  # 如果你快速连推两个 commit，第二个会排队等第一个跑完，
+  # 而不是并行——避免两个部署同时写 Pages 互相覆盖。
+  group: pages
+  # 部署不像测试，中途取消可能留下半截产物，所以选择"false 排队"而非"true 取消旧的"。
+  cancel-in-progress: false
+
+# 任务
+jobs:
+  # "产物构建"和"环境发布"分离是 CI/CD 的标准模式。
+  # 构建可以并行、可复用、可回滚；发布是唯一的、有状态的、需要权限的。
+  # 混在一起会失去这种解耦。
+
+  build:
+    # 在通用 runner 上构建产物
+    runs-on: ubuntu-latest
+    steps:
+      # 检出仓库
+      - uses: actions/checkout@v4
+      # 不写 version，它会自动读取根 package.json 的 packageManager 字段。
+      # 由于 packageManager 已经删除，所以需要手动设置 version。
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      # 设置 Node.js 环境
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # 安装依赖
+      - name: Install dependencies
+        # 普通 install 允许 pnpm 在 lockfile 过期时自动更新它。
+        # --frozen-lockfile 禁止任何更新：
+        # 如果 package.json 和 lockfile 不一致就直接失败。
+        run: pnpm install --frozen-lockfile
+
+      # 构建产物
+      - name: Build docs
+        # 使用 pnpm 构建产物
+        run: pnpm docs:build
+
+      # 读取仓库的 Pages 配置，把部署所需的元信息（base URL 等）注入到后续步骤的环境里。
+      # 有些场景下它会设置 GITHUB_PAGES_URL 之类的变量。
+      # 放在 build 之后调用是官方推荐的顺序。
+      - uses: actions/configure-pages@v5
+
+      # 把 docs/.vitepress/dist 打包成一个 artifact（构建产物包），传给下一个 job。
+      # 这就是两个 job 之间传递数据的方式——job 之间不共享文件系统，只能靠 artifact 或缓存传递
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/.vitepress/dist
+
+  deploy:
+    # 依赖 build 任务，确保产物存在
+    needs: build
+    # 在通用 runner 上发布
+    runs-on: ubuntu-latest
+    # 发布到 GitHub Pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      # 用 deployment ID 访问 artifact，获取 page_url
+      - id: deployment
+        # 用 actions/deploy-pages@v4 发布到 GitHub Pages
+        # 这是 GitHub 官方的 Pages 部署工具，支持自动更新、自动重试、自动清理等特性。
+        # 它内部会调用 GitHub API 更新仓库的 Pages 配置，并把 artifact 里的内容发布到 GitHub Pages。
+        uses: actions/deploy-pages@v4
+
+# 为什么构建产物要专门打包成 artifact
+# 原理：GitHub Actions 的每个 job 跑在全新的、隔离的虚拟机上，job 之间不共享磁盘。
+# build 里构建的 dist/ 在 build job 结束后就销毁了。
+# 所以必须显式"上传 artifact" → 下一 job "下载/发布 artifact"。
+# upload-pages-artifact + deploy-pages 这对 action 就是封装了这个"上传→发布"的握手。

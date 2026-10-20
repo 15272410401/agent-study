@@ -1,0 +1,20 @@
+{
+  "name": "@agent-learning/lesson-01",
+  "private": true,
+  "description": "01.Agent 认知：OpenAI 兼容 SDK + Function Calling + 流式输出的最小 Agent",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "openai": "^7.39.0"
+  },
+  "keywords": ["agent", "openai", "deepseek", "function-calling"],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}
