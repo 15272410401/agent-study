@@ -9,6 +9,10 @@ export default defineConfig({
   title: 'Agent 应用开发学习笔记',
   description: '记录 Agent 应用开发学习过程',
   base,
+  ignoreDeadLinks: [
+    // 忽略 http:// 或 https:// 开头的 localhost 和 127.0.0.1 链接
+    /^https?:\/\/(localhost|127\.0\.0\.1)/,
+  ],
   themeConfig: {
     docFooter: {
       prev: '上一页',
