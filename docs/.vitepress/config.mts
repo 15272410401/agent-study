@@ -31,6 +31,7 @@ export default defineConfig({
         text: '基础认知',
         items: [
           { text: '01.Agent 认知', link: '/notes/01.Agent 认知' },
+          { text: '02.低代码平台认知', link: '/notes/02.低代码平台认知' },
         ],
       },
       {
@@ -41,8 +42,10 @@ export default defineConfig({
       },
     ],
     outline: {
-      level: [2, 4],   // 只显示 H2 和 H3 和 H4，默认就是这个
-      label: '本页目录', // 把 "On this page" 改成中文
+      // 只显示 H2 和 H3 和 H4，默认就是这个
+      level: [2, 4],
+      // 把 "On this page" 改成中文
+      label: '本页目录',
     },
     socialLinks: [
       { icon: 'github', link: 'https://github.com/15272410401/agent-study.git' },

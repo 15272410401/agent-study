@@ -4,3 +4,5 @@ packages:
   - 'packages/*'
 allowBuilds:
   esbuild: false
+  unrs-resolver: true
+  vue-demi: true
