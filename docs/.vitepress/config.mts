@@ -36,6 +36,7 @@ export default defineConfig({
         items: [
           { text: '01.Agent 认知', link: '/notes/01.Agent 认知' },
           { text: '02.低代码平台认知', link: '/notes/02.低代码平台认知' },
+          { text: '03.LangGraph 编排思维', link: '/notes/03.LangGraph 编排思维' },
         ],
       },
       {

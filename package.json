@@ -8,7 +8,8 @@
     "docs:build": "pnpm --filter docs build",
     "docs:preview": "pnpm --filter docs preview",
     "lesson-01": "pnpm --filter lesson-01 dev",
-    "lesson-02": "pnpm --filter lesson-02 dev"
+    "lesson-02": "pnpm --filter lesson-02 dev",
+    "lesson-03": "pnpm --filter lesson-03 dev"
   },
   "keywords": [],
   "author": "",
